@@ -14,6 +14,14 @@
  * a little simpler to work with.
  */
 
+var colSound = new Audio("sounds/collision.wav");
+var gemSound = new Audio("sounds/gem.wav");
+var introSound = new Audio("sounds/intro.wav");
+introSound.loop = true;
+var jumpSound = new Audio("sounds/jump.wav");
+var moveSound = new Audio("sounds/move.wav");
+
+
 var Engine = (function(global) {
     /* Predefine the variables we'll be using within this scope,
      * create the canvas element, grab the 2D context for that canvas
@@ -25,8 +33,8 @@ var Engine = (function(global) {
         ctx = canvas.getContext('2d'),
         lastTime;
 
-    canvas.width = 505;
-    canvas.height = 606;
+    canvas.width = blocksX * 101;
+    canvas.height = blocksY * 101;
     doc.body.appendChild(canvas);
 
     /* This function serves as the kickoff point for the game loop itself
@@ -45,8 +53,14 @@ var Engine = (function(global) {
         /* Call our update/render functions, pass along the time delta to
          * our update function since it may be used for smooth animation.
          */
+
         update(dt);
         render();
+        renderEntities();
+        if (hearts === 0) {
+            showEnd();
+            return;
+        }
 
         /* Set our lastTime variable which is used to determine the time delta
          * for the next time this function is called.
@@ -64,9 +78,8 @@ var Engine = (function(global) {
      * game loop.
      */
     function init() {
-        reset();
-        lastTime = Date.now();
-        main();
+        introSound.play();
+        showStart();
     }
 
     /* This function is called by main (our game loop) and itself calls all
@@ -80,7 +93,7 @@ var Engine = (function(global) {
      */
     function update(dt) {
         updateEntities(dt);
-        // checkCollisions();
+        checkCollisions(dt);
     }
 
     /* This is called by the update function and loops through all of the
@@ -94,7 +107,7 @@ var Engine = (function(global) {
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
-        player.update();
+        player.update(dt);
     }
 
     /* This function initially draws the "game level", it will then call
@@ -107,16 +120,16 @@ var Engine = (function(global) {
         /* This array holds the relative URL to the image used
          * for that particular row of the game level.
          */
-        var rowImages = [
-                'images/water-block.png',   // Top row is water
-                'images/stone-block.png',   // Row 1 of 3 of stone
-                'images/stone-block.png',   // Row 2 of 3 of stone
-                'images/stone-block.png',   // Row 3 of 3 of stone
-                'images/grass-block.png',   // Row 1 of 2 of grass
-                'images/grass-block.png'    // Row 2 of 2 of grass
-            ],
-            numRows = 6,
-            numCols = 5,
+        var rowImages = [];
+        rowImages.push('images/water-block.png');
+        for (var i = 0; i < blocksY - 3; i++) {
+            rowImages.push('images/stone-block.png');
+        }
+        rowImages.push('images/grass-block.png');
+        rowImages.push('images/grass-block.png');
+        rowImages.push('images/heart_small.png');
+        var numRows = blocksY,
+            numCols = blocksX,
             row, col;
 
         /* Loop through the number of rows and columns we've defined above
@@ -135,9 +148,39 @@ var Engine = (function(global) {
                 ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
             }
         }
+        //draw Hearts
+        for (i = 0; i < hearts; i++) {
+            ctx.drawImage(Resources.get(rowImages[row]), canvas.width - 150 + i * 50, 50);
+        }
 
-        renderEntities();
+        //draw score
+        ctx.font = "18px Comic Sans MS";
+        ctx.textAlign = "center";
+        ctx.lineWidth = 2;
+        ctx.fillStyle = "white";
+        ctx.fillText("Max Score: " + maxScore + "    Score: " + Math.floor(score), canvas.width / 2, 85);
+
     }
+
+
+    function renderGem() {
+
+        if (Math.random() < 0.001) {
+            gems.push(new Gem());
+        }
+
+        gems.forEach(function(gem) {
+            if (Date.now() - gem.time < 10000) { //10 sec max for gem
+                gem.render();
+            } else {
+                gems.splice(gems.indexOf(gem), 1); //remove it
+            }
+        });
+
+    }
+
+
+
 
     /* This function is called by the render function and is called on each game
      * tick. Its purpose is to then call the render functions you have defined
@@ -147,19 +190,148 @@ var Engine = (function(global) {
         /* Loop through all of the objects within the allEnemies array and call
          * the render function you have defined.
          */
+
+        //random put gem 
+        renderGem();
+
         allEnemies.forEach(function(enemy) {
             enemy.render();
         });
 
         player.render();
+
+
+
+
     }
+
+
+
+
+    //function is called after game init
+    function showStart() {
+
+        //render grass and rocks
+        render();
+
+        //render skins
+        var skins = [];
+
+        function renderSkins() {
+            skins = ['images/char-boy.png',
+                'images/char-cat-girl.png',
+                'images/char-horn-girl.png',
+                'images/char-pink-girl.png',
+                'images/char-princess-girl.png'
+            ];
+
+            var x = canvas.width / 2 - 250;
+            var y = canvas.height / 2;
+            skins.forEach(function(skin) {
+                ctx.drawImage(Resources.get(skin), x, y);
+                x += 101;
+            });
+        }
+        renderSkins();
+
+
+        //renderText for selector
+        function renderText() {
+            ctx.font = "bold 40pt Impact";
+            ctx.fillStyle = "white";
+            ctx.strokeStyle = "black";
+            ctx.fillText("Choose your Character", canvas.width / 2, canvas.height / 2 - 50);
+            ctx.strokeText("Choose your Character", canvas.width / 2, canvas.height / 2 - 50);
+            ctx.font = "bold 35pt Impact";
+            ctx.fillText("Press Enter to Start", canvas.width / 2, canvas.height / 2);
+            ctx.strokeText("Press Enter to Start", canvas.width / 2, canvas.height / 2);
+        }
+        renderText();
+
+
+        //render chooser
+        var selector = 'images/Selector.png';
+        var selectorY = canvas.height / 2 + 55;
+        var selectorX = canvas.width / 2 - 50.5;
+        ctx.drawImage(Resources.get(selector), canvas.width / 2 - 50.5, selectorY);
+
+
+
+        //choose Character's skin based on user's input
+        selectorInput = function(key) {
+
+            //listen to user's input, render all over again and add selector render
+            if (key === 'left' && selectorX >= 202) {
+                render();
+                renderSkins();
+                renderText();
+                selectorX -= 101;
+                ctx.drawImage(Resources.get(selector), selectorX, selectorY);
+            } else if (key === 'right' && selectorX <= 404) {
+                render();
+                renderSkins();
+                renderText();
+                selectorX += 101;
+                ctx.drawImage(Resources.get(selector), selectorX, selectorY);
+            } else if (key === 'enter') {
+                initPlayer(skins[selectorX / 101 - 1]);
+                reset();
+                lastTime = Date.now();
+                main(); //start the game
+            }
+
+        };
+    }
+
+
+
+    //screen that shows up after the game is over
+    function showEnd() {
+
+        render();
+        ctx.font = "bold 50pt Impact";
+        ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2 - 50);
+        ctx.strokeText("Game Over", canvas.width / 2, canvas.height / 2 - 50);
+
+
+        if (score > maxScore) {
+            maxScore = Math.floor(score);
+            ctx.font = "bold 35pt Impact";
+            ctx.fillText("New record!", canvas.width / 2, canvas.height / 2);
+            ctx.strokeText("New record!", canvas.width / 2, canvas.height / 2);
+        }
+
+
+        ctx.font = "bold 25pt Impact";
+        ctx.fillText("Press Enter to Continue", canvas.width / 2, canvas.height / 2 + 50);
+        ctx.strokeText("Press Enter to Continue", canvas.width / 2, canvas.height / 2 + 50);
+        ctx.fillText("Or space to try another Character", canvas.width / 2, canvas.height / 2 + 100);
+        ctx.strokeText("Or space to try another Character", canvas.width / 2, canvas.height / 2 + 100);
+
+        //listen to user's choice
+        selectorInput = function(key) {
+            if (key === 'space') {
+                showStart();
+            } else if (key === 'enter') {
+                reset();
+                lastTime = Date.now();
+                main();
+            }
+        };
+    }
+
+
 
     /* This function does nothing but it could have been a good place to
      * handle game reset states - maybe a new game menu or a game over screen
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-        // noop
+        hearts = 3;
+        player.level = 1;
+        score = 0;
+        gems = [];
+        initBugs();
     }
 
     /* Go ahead and load all of the images we know we're going to need to
@@ -171,7 +343,14 @@ var Engine = (function(global) {
         'images/water-block.png',
         'images/grass-block.png',
         'images/enemy-bug.png',
-        'images/char-boy.png'
+        'images/char-boy.png',
+        'images/heart_small.png',
+        'images/char-cat-girl.png',
+        'images/char-horn-girl.png',
+        'images/char-pink-girl.png',
+        'images/char-princess-girl.png',
+        'images/gem-blue_small.png',
+        'images/Selector.png'
     ]);
     Resources.onReady(init);
 

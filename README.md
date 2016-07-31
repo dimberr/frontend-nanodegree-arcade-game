@@ -1,6 +1,13 @@
-frontend-nanodegree-arcade-game
-===============================
+# Arcarde Game
 
-Students should use this [rubric](https://review.udacity.com/#!/projects/2696458597/rubric) for self-checking their submission. Make sure the functions you write are **object-oriented** - either class functions (like Player and Enemy) or class prototype functions such as Enemy.prototype.checkCollisions, and that the keyword 'this' is used appropriately within your class and class prototype functions to refer to the object the function is called upon. Also be sure that the **readme.md** file is updated with your instructions on both how to 1. Run and 2. Play your arcade game.
+This game was developed after 'Object Oriented Javascript' and 'HTML5 Canvas' courses during [Udacity Front End Developer nanodegree](https://www.udacity.com/course/front-end-web-developer-nanodegree--nd001).
 
-For detailed instructions on how to get started, check out this [guide](https://docs.google.com/document/d/1v01aScPjSWCCWQLIpFqvg3-vXLH2e8_SZQKC8jNO0Dc/pub?embedded=true).
+## Rules
+* Choose your Character and use &#8592; &#8593; &#8594; for move
+* You should reach the Water and avoid all Bugs
+* Every Gem will add 500 Points
+
+
+### TO-DO
+* change sounds
+* add option to mute the music
