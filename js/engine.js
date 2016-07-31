@@ -14,6 +14,8 @@
  * a little simpler to work with.
  */
 
+"use strict";
+
 var colSound = new Audio("sounds/collision.wav");
 var gemSound = new Audio("sounds/gem.wav");
 var introSound = new Audio("sounds/intro.wav");
@@ -33,8 +35,8 @@ var Engine = (function(global) {
         ctx = canvas.getContext('2d'),
         lastTime;
 
-    canvas.width = blocksX * 101;
-    canvas.height = blocksY * 101;
+    canvas.width = BLOCKSX * 101;
+    canvas.height = BLOCKSY * 101;
     doc.body.appendChild(canvas);
 
     /* This function serves as the kickoff point for the game loop itself
@@ -122,14 +124,14 @@ var Engine = (function(global) {
          */
         var rowImages = [];
         rowImages.push('images/water-block.png');
-        for (var i = 0; i < blocksY - 3; i++) {
+        for (var i = 0; i < BLOCKSY - 3; i++) {
             rowImages.push('images/stone-block.png');
         }
         rowImages.push('images/grass-block.png');
         rowImages.push('images/grass-block.png');
         rowImages.push('images/heart_small.png');
-        var numRows = blocksY,
-            numCols = blocksX,
+        var numRows = BLOCKSY,
+            numCols = BLOCKSX,
             row, col;
 
         /* Loop through the number of rows and columns we've defined above
@@ -191,7 +193,7 @@ var Engine = (function(global) {
          * the render function you have defined.
          */
 
-        //random put gem 
+        //random put gem
         renderGem();
 
         allEnemies.forEach(function(enemy) {

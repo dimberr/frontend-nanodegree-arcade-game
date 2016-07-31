@@ -1,16 +1,19 @@
+"use strict";
+
 //variables
 var player;
 var allEnemies = [];
 var gems = [];
 var gem;
-var blocksX = 7;
-var blocksY = 8;
-var startXpos = Math.floor(blocksX / 2) * 101;
-var startYpos = (blocksY) * 83 - 106; //to center in cell
-var rightWall = blocksX * 101;
+var BLOCKSX = 7;
+var BLOCKSY = 8;
+var startXpos = Math.floor(BLOCKSX / 2) * 101;
+var startYpos = (BLOCKSY) * 83 - 106; //to center in cell
+var rightWall = BLOCKSX * 101;
 var hearts = 3;
 var score = 0;
 var maxScore = 0;
+
 
 
 //Global Unit variable for Bugs and Player
@@ -106,8 +109,8 @@ Player.prototype.handleInput = function(key) {
 var Gem = function() {
     //very slight probability that two gems will be in the same [row][col]
     //if it happens => user wins two gems.. Not needed special checks for this
-    var rndmX = Math.floor(Math.random() * (blocksX));
-    var rndmY = Math.floor(Math.random() * (blocksY - 4) + 2); //except first and last two rows
+    var rndmX = Math.floor(Math.random() * (BLOCKSX));
+    var rndmY = Math.floor(Math.random() * (BLOCKSY - 4) + 2); //except first and last two rows
     Unit.call(this, rndmX * 101 + 25.25, rndmY * 83 - 20.75); //center in cell
     this.sprite = 'images/gem-blue_small.png';
     this.time = Date.now();
@@ -155,7 +158,7 @@ function initPlayer(url) {
 function initBugs() {
     allEnemies = [];
     var y = 60; //y position for first row
-    for (var i = 0; i < blocksY - 3; i++) {
+    for (var i = 0; i < BLOCKSY - 3; i++) {
         allEnemies.push(new Enemy(720, y));
         y += 83;
     }
