@@ -1,6 +1,6 @@
 # Arcarde Game
 
-This game was developed after 'Object Oriented Javascript' and 'HTML5 Canvas' courses during [Udacity Front End Developer nanodegree](https://www.udacity.com/course/front-end-web-developer-nanodegree--nd001).
+This HTML5 Canvas powered video game was developed after 'Object Oriented Javascript' and 'HTML5 Canvas' courses during [Udacity Front End Developer nanodegree](https://www.udacity.com/course/front-end-web-developer-nanodegree--nd001).
 
 ## Rules
 
